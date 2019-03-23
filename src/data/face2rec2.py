@@ -101,8 +101,8 @@ def image_encode(args, i, item, q_out):
         q_out.put((i, s, oitem))
     else: 
       header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
-      #print('write', item.flag, item.id, item.label)
-      s = mx.recordio.pack(header, '')
+      print('write', item.flag, item.id, item.label)
+      s = mx.recordio.pack(header, b'')
       q_out.put((i, s, oitem))
 
 
@@ -174,7 +174,7 @@ def parse_args():
     rgroup = parser.add_argument_group('Options for creating database')
     rgroup.add_argument('--quality', type=int, default=95,
                         help='JPEG quality for encoding, 1-100; or PNG compression for encoding, 1-9')
-    rgroup.add_argument('--num-thread', type=int, default=1,
+    rgroup.add_argument('--num-thread', type=int, default=2,
                         help='number of thread to use for encoding. order of images will be different\
         from the input list if >1. the input list will be modified to match the\
         resulting order.')
@@ -249,6 +249,7 @@ if __name__ == '__main__':
                                                            os.path.join(working_dir, fname_rec), 'w')
                     cnt = 0
                     pre_time = time.time()
+                    print("packing images")
                     for i, item in enumerate(image_list):
                         image_encode(args, i, item, q_out)
                         if q_out.empty():

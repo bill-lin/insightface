@@ -10,7 +10,7 @@ import mxnet as mx
 
 parser = argparse.ArgumentParser(description='face model slim')
 # general
-parser.add_argument('--model', default='../models/model-r34-amf/model,60', help='path to load model.')
+parser.add_argument('--model', default='./models/face-reco-model-r100-ii/model,0', help='path to load model.')
 args = parser.parse_args()
 
 _vec = args.model.split(',')
@@ -22,9 +22,12 @@ sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch)
 all_layers = sym.get_internals()
 sym = all_layers['fc1_output']
 dellist = []
-for k,v in arg_params.iteritems():
+for k,v in arg_params.items():
+  if k.startswith('fc'):
+    print("k = " + k)
   if k.startswith('fc7'):
     dellist.append(k)
+print("dellist length = " + str(len(dellist)))
 for d in dellist:
   del arg_params[d]
 mx.model.save_checkpoint(prefix+"s", 0, sym, arg_params, aux_params)

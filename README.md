@@ -236,3 +236,11 @@ year={2019}
 [Jia Guo](guojia[at]gmail.com)
 [Jiankang Deng](jiankangdeng[at]gmail.com)
 ```
+
+## Docker
+mxnet + tensorflow + jupyter
+```
+docker build . -t insightface
+docker run  -v /Users/binlin/ml/gitroot/insightface:/insightface-ft  -v /Users/binlin/cyll/images:/images -it insightface:latest /bin/bash
+
+```
