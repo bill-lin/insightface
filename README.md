@@ -244,3 +244,30 @@ docker build . -t insightface
 docker run  -v /Users/binlin/ml/gitroot/insightface:/insightface-ft  -v /Users/binlin/cyll/images:/images -it insightface:latest /bin/bash
 
 ```
+
+## finetune training
+- create cropped faces dataset
+    - input-dir contains user folders, each user folder contains loosly crop faces
+    - output: lst file, MTCNN cropped faces
+```
+python3 src/align/align_megaface.py --input-dir  /images/zaw-photos-2kusers-output/insight/training_data --name webface --output-dir /images/zaw-photos-2kusers-output/insight/training_data_insight
+```
+
+- pack training data
+    - create property file:  /images/zaw-photos-1000users-output/insight/training_data_insight/property
+        - content: 1000,112,112
+    - input: lst file from previous step
+    - output: training_data_core.idx, training_data_core.rec
+ ```
+ python3 src/data/face2rec2.py  /images/zaw-photos-2kusers-output/insight/training_data_insight/training_data_core.lst
+ ```
+
+- run training
+train_triplet.py examples:
+```
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_triplet.py --data-dir $DATA_DIR \
+  --network "$NETWORK" --lr 0.005 --pretrained "$PRETRAINED" --per-batch-size 60
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network m1 --loss triplet --lr 0.005 --pretrained ./models/m1-softmax-emore,1
+
+CUDA_VISIBLE_DEVICES='1' python3 -u src/train_triplet.py --data-dir /images/zaw-photos-1000users-output/insight/training_data_insight --network r100  --lr 0.005 --pretrained ./models/face-reco-model-r100-ii/model,0 --per-batch-size 10
+```
