@@ -35,10 +35,14 @@ import sklearn
 sys.path.append(os.path.join(os.path.dirname(__file__), 'losses'))
 import center_loss
 
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename='training.log',
+                    filemode='w')
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
 
 args = None
 
@@ -64,7 +68,7 @@ def parse_args():
   parser.add_argument('--data-dir', default='', help='training set directory')
   parser.add_argument('--prefix', default='../model/model', help='directory to save model.')
   parser.add_argument('--pretrained', default='', help='pretrained model to load')
-  parser.add_argument('--ckpt', type=int, default=3, help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
+  parser.add_argument('--ckpt', type=int, default=2, help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
   parser.add_argument('--network', default='r50', help='specify network')
   parser.add_argument('--version-se', type=int, default=0, help='whether to use se in network')
   parser.add_argument('--version-input', type=int, default=1, help='network input config')
@@ -82,7 +86,7 @@ def parse_args():
   parser.add_argument('--triplet-bag-size', type=int, default=3600, help='')
   parser.add_argument('--triplet-alpha', type=float, default=0.3, help='')
   parser.add_argument('--triplet-max-ap', type=float, default=0.0, help='')
-  parser.add_argument('--verbose', type=int, default=2000, help='')
+  parser.add_argument('--verbose', type=int, default=200, help='')
   parser.add_argument('--loss-type', type=int, default=1, help='')
   parser.add_argument('--use-deformable', type=int, default=0, help='')
   parser.add_argument('--rand-mirror', type=int, default=1, help='')
@@ -330,7 +334,7 @@ def train_net(args):
           break
 
       _cb(param)
-      if mbatch%1000==0:
+      if mbatch%100==0:
         print('lr-batch-epoch:',opt.lr,param.nbatch,param.epoch)
 
       if mbatch>=0 and mbatch%args.verbose==0:
@@ -339,6 +343,8 @@ def train_net(args):
         msave = save_step[0]
         do_save = False
         is_highest = False
+        print("acc_list: ")
+        print(*acc_list)
         if len(acc_list)>0:
           #lfw_score = acc_list[0]
           #if lfw_score>highest_acc[0]:
@@ -346,6 +352,7 @@ def train_net(args):
           #  if lfw_score>=0.998:
           #    do_save = True
           score = sum(acc_list)
+          logger.info("score = " + str(score))
           if acc_list[-1]>=highest_acc[-1]:
             if acc_list[-1]>highest_acc[-1]:
               is_highest = True
