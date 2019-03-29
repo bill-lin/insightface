@@ -34,6 +34,12 @@ import sklearn
 #sys.path.append(os.path.join(os.path.dirname(__file__), 'losses'))
 #import center_loss
 
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename='train_softmax.log',
+                    filemode='w')
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -196,7 +202,7 @@ def get_symbol(args, arg_params, aux_params):
                           weight = _weight,
                           beta=args.beta, margin=args.margin, scale=args.scale,
                           beta_min=args.beta_min, verbose=1000, name='fc7')
-  elif args.loss_type==2:
+  elif args.loss_type==2: # CosineFace Loss
     s = args.margin_s
     m = args.margin_m
     assert(s>0.0)
@@ -207,7 +213,7 @@ def get_symbol(args, arg_params, aux_params):
     s_m = s*m
     gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = s_m, off_value = 0.0)
     fc7 = fc7-gt_one_hot
-  elif args.loss_type==4:
+  elif args.loss_type==4: # arc face
     s = args.margin_s
     m = args.margin_m
     assert s>0.0
